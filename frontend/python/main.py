@@ -17,26 +17,26 @@
 # under the License.
 #
 
-import animalid
 import argparse
 import asyncio
 import os
-import json
+import random
 import uuid
 import uvicorn
+import asyncio
 
-from httpx import AsyncClient, HTTPError
-from sse_starlette.sse import EventSourceResponse
 from starlette.applications import Starlette
-from starlette.responses import FileResponse, JSONResponse, Response
+from starlette.responses import FileResponse, Response
+from sse_starlette.sse import EventSourceResponse
 from starlette.staticfiles import StaticFiles
+import httpx
 
 process_id = f"frontend-{uuid.uuid4().hex[:8]}"
 records = list()
 
 async def startup():
-    global change_event
-    change_event = asyncio.Event()
+    """Starts the background task to fetch and forward events."""
+    asyncio.create_task(forward_events())
 
 star = Starlette(debug=True, on_startup=[startup])
 star.mount("/static", StaticFiles(directory="static"), name="static")
@@ -45,71 +45,68 @@ star.mount("/static", StaticFiles(directory="static"), name="static")
 async def index(request):
     return FileResponse("static/index.html")
 
-@star.route("/api/data")
-async def data(request):
-    return JSONResponse(records);
+# Keep track of connected clients (their response generators)
+subscribers = set()
+
+async def fetch_events():
+    """Connects to Event Source and yields events with continuous reconnection."""
+    async with httpx.AsyncClient() as client:
+        while True:
+            try:
+                print(f"Attempting to connect to Event Source A at {f"{backend_url}/api/notifications"}")
+                async with client.stream("GET", f"{backend_url}/api/notifications", timeout=None) as response:
+                    response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+                    async for line in response.aiter_lines():
+                        if line.startswith("data:"):
+                            yield line[len("data:"):].strip()
+                        elif line == "":
+                            continue # Keep-alive or other empty lines
+            except httpx.HTTPError as e:
+                print(f"HTTP error from Event Source A: {e}")
+            except httpx.ConnectError as e:
+                print(f"Connection error to Event Source A: {e}")
+            except Exception as e:
+                print(f"An unexpected error occurred while fetching events: {e}")
+
+            wait_time = 1
+            print(f"Lost connection to Event Source A. Retrying in {wait_time:.2f} seconds...")
+            await asyncio.sleep(wait_time)
+
+async def forward_events():
+    async for event in fetch_events():
+        print(f"Received event: {event}")
+        dead_clients = set()
+        for queue in subscribers:
+            try:
+                await queue.put(f"data: {event}\n\n")
+            except asyncio.QueueFull:
+                print("Client queue full, might be slow or disconnected.")
+                dead_clients.add(queue)
+            except Exception as e:
+                print(f"Error sending to client: {e}")
+                dead_clients.add(queue)
+        subscribers.difference_update(dead_clients)
 
 @star.route("/api/notifications")
 async def notifications(request):
-    async def generate():
-        while True:
-            await change_event.wait()
-            yield {"data": "1"}
+    """SSE endpoint for clients to subscribe."""
+    queue: asyncio.Queue = asyncio.Queue()
+    subscribers.add(queue)
 
-    return EventSourceResponse(generate())
-
-@star.route("/api/generate-id", methods=["POST"])
-async def generate_id(request):
-    id = animalid.generate_id()
-
-    response_data = {
-        "id": id,
-        "name": id.replace("-", " ").title(),
-    }
-
-    return JSONResponse(response_data)
-
-@star.route("/api/hello", methods=["POST"])
-async def hello(request):
-    request_data = await request.json()
-
-    name = request_data["name"]
-    text = request_data["text"]
-
-    backend_request, backend_response, backend_error = await send_greeting(name, text)
-
-    record = {
-        "request": backend_request,
-        "response": backend_response,
-        "error": backend_error,
-    }
-
-    records.append(record);
-
-    change_event.set()
-    change_event.clear()
-
-    return JSONResponse(backend_response)
-
-async def send_greeting(name, text):
-    request_data = {
-        "name": name,
-        "text": text,
-    }
-
-    async with AsyncClient() as client:
+    async def event_generator():
         try:
-            response = await client.post(f"{backend_url}/api/hello", json=request_data)
-        except HTTPError as e:
-            return request_data, None, str(e)
+            while True:
+                event = await queue.get()
+                yield event.encode()
+        except asyncio.CancelledError:
+            print("Client disconnected.")
+        finally:
+            subscribers.remove(queue)
 
-    response_data = response.json()
-
-    return request_data, response_data, None
+    return EventSourceResponse(event_generator())
 
 @star.route("/api/health", methods=["GET"])
 async def health(request):
-    await send_greeting("Testy Tiger", "Hi")
 
     return Response("OK\n", 200)
 

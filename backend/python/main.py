@@ -18,12 +18,15 @@
 #
 
 import argparse
+import asyncio
 import os
+import time
 import thingid
 import uvicorn
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
+from sse_starlette.sse import EventSourceResponse
 
 name = thingid.generate_id().replace("-", " ").title()
 pod = os.environ.get("HOSTNAME", "backend")
@@ -47,6 +50,17 @@ async def hello(request):
 @star.route("/api/health", methods=["GET"])
 async def health(request):
     return Response("OK\n", 200)
+
+@star.route("/api/notifications")
+async def notifications(request):
+    async def generate():
+        while True:
+            yield {
+                "data": f"Hello, stranger. I am {name} ({pod})."
+            }
+            await asyncio.sleep(1)
+
+    return EventSourceResponse(generate())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

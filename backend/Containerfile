@@ -21,7 +21,7 @@ ARG TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM mirror.gcr.io/library/python:alpine AS build
 
-RUN pip install --no-cache-dir starlette uvicorn
+RUN pip install --no-cache-dir starlette sse_starlette uvicorn
 
 FROM --platform=$TARGETPLATFORM mirror.gcr.io/library/python:alpine AS run
 
