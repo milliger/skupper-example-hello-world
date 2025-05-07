@@ -17,13 +17,11 @@
 # under the License.
 #
 
-ARG TARGETPLATFORM
+FROM --platform=linux/amd64 mirror.gcr.io/library/python:alpine AS build
 
-FROM --platform=$TARGETPLATFORM mirror.gcr.io/library/python:alpine AS build
+RUN pip install --no-cache-dir starlette sse_starlette uvicorn pandas
 
-RUN pip install --no-cache-dir starlette sse_starlette uvicorn
-
-FROM --platform=$TARGETPLATFORM mirror.gcr.io/library/python:alpine AS run
+FROM --platform=linux/amd64 mirror.gcr.io/library/python:alpine AS run
 
 RUN adduser -S fritz -G root
 USER fritz

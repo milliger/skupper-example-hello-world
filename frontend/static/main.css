@@ -1,10 +1,30 @@
-@import url("./gesso/main.css");
-
-span.name {
-    font-weight: 600;
+html {
+    height: 100%;
 }
 
-span.error {
-    font-weight: 500;
-    color: red;
+body {
+    height: 100%;
+    margin: 0;
+}
+
+#content {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+
+    #map {
+        flex: 3;
+        height: 100%;
+
+        .leaflet-tile-pane {
+            filter: grayscale(1);
+        }
+    }
+
+    #messages {
+        flex: 1; 
+        height: 100%;
+        overflow-y: scroll;
+        font-size: x-small;
+    }
 }

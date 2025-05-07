@@ -1,12 +1,12 @@
 services:
-  frontend:
+  flight-monitor:
     build:
       context: ./frontend
       dockerfile: Containerfile
     ports:
       - "4000:8080" 
 
-  backend:
+  flight-data-provider:
     build:
       context: ./backend
       dockerfile: Containerfile

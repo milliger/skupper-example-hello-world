@@ -19,10 +19,12 @@
 
 import argparse
 import asyncio
+import datetime
+import json
 import os
-import time
 import thingid
 import uvicorn
+import pandas as pd
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
@@ -51,14 +53,39 @@ async def hello(request):
 async def health(request):
     return Response("OK\n", 200)
 
+flight_data = pd.read_csv('python/flight_data_with_headings.csv')
+
 @star.route("/api/notifications")
 async def notifications(request):
     async def generate():
+        # for index, row in flight_data.iterrows():
         while True:
-            yield {
-                "data": f"Hello, stranger. I am {name} ({pod})."
+            now = datetime.datetime.now()
+            seconds_since_full_hour = now.minute * 60 + now.second
+            row = flight_data.iloc[seconds_since_full_hour]
+
+            planes = []
+            for id in range (1, 11):
+                plane_id = f"Plane_{id}"
+                planes.append({
+                    "plane_id": plane_id,
+                    "lat": row[f"{plane_id}_lat"],
+                    "lon": row[f"{plane_id}_long"],
+                    "head": row[f"{plane_id}_heading"],
+                })
+
+            yield { 
+                "data": json.dumps({
+                    "origin": f"I am {name} ({pod})",
+                    "planes": planes
+                })
             }
             await asyncio.sleep(1)
+        # while True:
+        #     yield {
+        #         "data": f"Hello, stranger. I am {name} ({pod})."
+        #     }
+        #     await asyncio.sleep(1)
 
     return EventSourceResponse(generate())
 
