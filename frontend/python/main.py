@@ -74,7 +74,6 @@ async def fetch_events():
 
 async def forward_events():
     async for event in fetch_events():
-        print(f"Received event: {event}")
         dead_clients = set()
         for queue in subscribers:
             try:
