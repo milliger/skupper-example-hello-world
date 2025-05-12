@@ -32,6 +32,7 @@ function updateMarker(plane_id, latitude, longitude, heading) {
         // If the marker already exists, just update its position
         const marker = markers[plane_id]
         marker.setLatLng(newLatLng);
+        marker.setRotationAngle(heading)
     }
 }
 
@@ -55,6 +56,4 @@ new EventSource("/api/notifications").onmessage = event => {
         // remove the oldest message
         messages.removeChild(messages.lastChild);
     }
-
-    console.log(event)
 };
