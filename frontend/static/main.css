@@ -109,7 +109,7 @@ body {
               ) 1 50%;
             border-image-slice: 1;
             background: linear-gradient(0deg, rgba(69, 137, 255, 0.1) 0.01%, rgba(38, 38, 38, 0) 50%);
-            padding: 16px;
+            padding: 11px;
             overflow-y: scroll;
             flex-grow: 10;
 
