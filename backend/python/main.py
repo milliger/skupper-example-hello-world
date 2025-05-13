@@ -76,7 +76,7 @@ async def notifications(request):
 
             yield { 
                 "data": json.dumps({
-                    "origin": f"I am {name} ({pod})",
+                    "origin": f"{pod}",
                     "planes": planes
                 })
             }

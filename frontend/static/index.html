@@ -1,16 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Real-time Map with Moving Marker</title>
+    <title>Hybrid Cloud Mesh Demonstrator</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link rel="stylesheet" href="/static/main.css"/>
     <link rel="stylesheet" href="https://unpkg.com/carbon-components@10/css/carbon-components.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
   </head>
   <body>
+    <header id="header">
+      <span class="icon"><img src="/static/icons/menu.svg"></span>
+      <p class="title"><span class="prefix">IBM</span>&nbsp;Hybrid Cloud Mesh Demonstrator</p>
+      <div class="spacer"></div>
+      <span class="icon"><img src="/static/icons/help.svg"></span>
+      <span class="icon"><img src="/static/icons/switcher.svg"></span>
+    </header>
     <div id="content">
       <div id="map"></div>
-      <div id="messages"></div>
+      <div class="sidebar">
+        <div class="pane-title">
+          <span class="icon-small"><img src="/static/icons/dashboard.svg"></span>
+          Incoming Data
+        </div>
+        <div class="pane-banner">
+          <span>Retrieving from&nbsp</span><span id="origin"></span>
+        </div>
+        <div id="messages"></div>
+      </div>
     </div>
     <script type="module" src="/static/rotatedMarker.js"></script>
     <script type="module" src="/static/main.js"></script>

@@ -3,6 +3,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Containerfile
+    develop:  
+      watch:
+        - path: ./frontend/static
+          action: sync
+          target: /home/fritz/static    
     ports:
       - "4000:8080" 
 

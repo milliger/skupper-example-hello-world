@@ -1,5 +1,5 @@
 // Initialize the map
-var map = L.map('map').setView([49.7079507, 7.6666393], 10); // Center on Munich with zoom level 13
+var map = L.map('map').setView([49.7079507, 7.6666393], 6); // Center on Munich with zoom level 13
 
 // Add a tile layer
 L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
@@ -47,13 +47,25 @@ new EventSource("/api/notifications").onmessage = event => {
         console.warn("Received event with missing planes:", data);
     }
 
-    const p = document.createElement("p")
-    p.innerHTML = `${new Date().toLocaleTimeString()}: ${event.data}`
+    const div = document.createElement("div")
+    div.className = "message"
+    const time_div = document.createElement("div")
+    time_div.className = "time"
+    const data_pre = document.createElement("pre")
+    data_pre.className = "data"
+    time_div.innerHTML = `${new Date().toLocaleTimeString()} | ${data.origin}`
+    data_pre.innerHTML = `${JSON.stringify(data.planes)}`
+
+    div.appendChild(time_div)
+    div.appendChild(data_pre)
 
     const messages = document.getElementById("messages")
-    messages.insertBefore(p, messages.firstChild);
+    messages.insertBefore(div, messages.firstChild);
     if (messages.children.length > 20) {
         // remove the oldest message
         messages.removeChild(messages.lastChild);
     }
+
+    const origin = document.getElementById("origin")
+    origin.innerHTML = data.origin
 };

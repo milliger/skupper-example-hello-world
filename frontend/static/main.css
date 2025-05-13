@@ -7,13 +7,59 @@ body {
     margin: 0;
 }
 
+.icon {
+    height: 48px;
+    width: 48px;
+    padding: 14px;
+    color: white;
+
+    img {
+        height: 20px;
+        width: 20px;
+    }
+}
+
+.icon-small {
+    height: 14px;
+    width: 14px;
+    margin-right: 16px;
+
+    img {
+        height: 14px;
+        width: 14px;
+    }
+}
+
+#header {
+    background-color: black;
+    color: rgb(244, 244, 244);
+    height: 48px;
+    border-bottom: 1px solid rgb(57, 57, 57);
+    display: flex;
+    align-items: center;
+
+    .spacer {
+        flex-grow: 8;
+    }
+
+    .title {
+        padding: 0 16px;
+        font-weight: 600;
+        font-size: .875rem;
+
+        .prefix {
+            font-weight: 400;
+        }
+    }
+}
+
 #content {
     display: flex;
     flex-direction: row;
-    height: 100%;
+    height: calc(100% - 48px);
 
     #map {
-        flex: 3;
+        flex: 7;
         height: 100%;
 
         .leaflet-tile-pane {
@@ -21,10 +67,69 @@ body {
         }
     }
 
-    #messages {
-        flex: 1; 
+    .sidebar {
+        flex: 2; 
         height: 100%;
-        overflow-y: scroll;
-        font-size: x-small;
+        display: flex;
+        flex-direction: column;
+        overflow-y: hidden;
+        background-color: #393939;
+        color: rgba(244, 244, 244, 1);
+        ;
+
+        .pane-title {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: .875rem;
+        }
+
+        .pane-banner {
+            min-height: 32px;
+            background-color: #0f62fe;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+
+            #origin {
+                font-weight: bold;
+            }
+        }
+        
+        #messages {
+            box-shadow: 0px -80px 70px -65px rgba(69, 137, 255, 0.16) inset;
+            border-width: 5px;
+            border-style: solid;
+            border-image: 
+              linear-gradient(
+                to top, 
+                #4589ff, 
+                rgba(166, 200, 255, 0.36)
+              ) 1 50%;
+            border-image-slice: 1;
+            background: linear-gradient(0deg, rgba(69, 137, 255, 0.1) 0.01%, rgba(38, 38, 38, 0) 50%);
+            padding: 16px;
+            overflow-y: scroll;
+            flex-grow: 10;
+
+            .message {
+                /* color: red; */
+                margin-bottom: 8px;
+                
+                .time {
+                    font-weight: bold;
+                    font-size: small;
+                    margin-bottom: 4px;
+                }
+
+                .data {
+                    font-size: x-small;
+                    font-family: IBM Plex Mono;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                }
+            }
+        }
     }
 }
